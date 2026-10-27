@@ -43,8 +43,11 @@ body {
   margin: 0 auto;
   padding: 28px 0 0;
 }
-.top a { display: inline-block; color: var(--ice); }
-.top svg { display: block; width: 44px; height: auto; fill: currentColor; }
+.top { display: flex; align-items: center; justify-content: space-between; }
+.top .back { color: var(--muted); text-decoration: none; padding: 8px 0; }
+.top .back:hover { color: var(--text); }
+.top .home { display: inline-block; color: var(--ice); }
+.top svg { display: block; width: 36px; height: auto; fill: currentColor; }
 
 main.text {
   width: min(100% - 32px, 720px);
