@@ -169,6 +169,9 @@
     footer { grid-column: 1 / -1; }
   }
 
+  /* Returning visitors: show the final state without any animation */
+  body.instant, body.instant * { transition: none !important; }
+
   @media (prefers-reduced-motion: reduce) {
     .logo, .reveal, .info::before { transition: none !important; }
   }
@@ -280,11 +283,24 @@
   // Fast at first, braking towards 10.
   const steps = [350, 70, 60, 55, 55, 65, 80, 105, 150, 220];
 
+  // The intro plays once per browser session; coming back from a subpage skips it.
+  let seen = false;
+  try { seen = sessionStorage.getItem('introSeen') === '1'; sessionStorage.setItem('introSeen', '1'); } catch (e) {}
+  if (!seen && document.referrer) {
+    try { seen = new URL(document.referrer).host === location.host; } catch (e) {}
+  }
+  if (seen) {
+    body.classList.add('instant');
+    finish();
+    // Re-enable transitions (hover etc.) once the final state is painted.
+    requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('instant')));
+  }
+
   (document.fonts ? document.fonts.load('900 100px "Rubik"') : Promise.resolve())
     .catch(() => {})
     .then(() => {
       fitDigits();
-      if (reduced) return finish();
+      if (reduced || seen) return finish();
       let t = 0;
       const live = () => body.classList.contains('intro');
       steps.forEach((d, i) => { t += d; setTimeout(() => live() && show(i + 1), t); });
