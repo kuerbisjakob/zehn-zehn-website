@@ -75,12 +75,14 @@ main.text {
 .text .muted { color: var(--muted); }
 
 footer {
-  padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  padding: 24px 12px calc(24px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 12px 28px;
+  /* Always one row: spacing and size shrink on narrow phones */
+  gap: clamp(8px, 3.6vw, 28px);
+  font-size: clamp(11px, 3.4vw, 14px);
+  white-space: nowrap;
   color: var(--muted);
 }
 footer a { color: inherit; text-decoration: none; }
