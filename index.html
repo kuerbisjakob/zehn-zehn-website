@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>10/10</title>
+<meta name="description" content="10/10 – bald im App Store. Zuerst in Münster.">
+<meta name="theme-color" content="#000000">
+<style>
+  /* Self-hosted fonts: no requests to Google or other third parties. */
+  @font-face { font-family: 'Barlow'; src: url('fonts/Barlow-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Rubik'; src: url('fonts/rubik-900.woff2') format('woff2'); font-weight: 900; font-display: block; }
+  :root {
+    --bg: #000;
+    --ice: #b8ecf0;
+    --text: #f2f0eb;
+    --muted: #8a8f91;
+    --line: rgba(184, 236, 240, .16);
+    --ease: cubic-bezier(.7, 0, .2, 1);
+    --glide: cubic-bezier(.55, 0, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 400 14px/1.6 'Barlow', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+  body.intro { overflow: hidden; }
+
+  /* ---------- Logo stage ----------
+     The stage always has its final layout. During the intro JS moves/scales the
+     logo into the viewport centre (--dx, --dy, --s); moving up then only animates
+     transform, which avoids per-frame relayout (the old height/width transition
+     stuttered). */
+  .stage {
+    height: 28svh;
+    padding-top: 4svh;
+    display: grid;
+    place-items: center;
+  }
+  .logo {
+    display: block;
+    width: min(24vw, 15svh);
+    height: auto;
+    fill: var(--ice);
+    transform: translate(var(--dx, 0), var(--dy, 0)) scale(var(--s, 1));
+    transition: transform .9s var(--glide);
+    will-change: transform;
+  }
+  body.done .logo { transform: none; }
+
+  .num { opacity: 0; }
+  .num.on { opacity: 1; }
+
+  /* ---------- Info ---------- */
+  .info {
+    width: min(100% - 32px, 720px);
+    margin: 0 auto;
+    padding: 6svh 0 28px;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity .7s ease, transform .7s var(--ease);
+  }
+  body.done .reveal { opacity: 1; transform: none; }
+  body.done .reveal:nth-child(1) { transition-delay: .45s; }
+  body.done .reveal:nth-child(2) { transition-delay: .57s; }
+  body.done .reveal:nth-child(3) { transition-delay: .69s; }
+  body.done .reveal:nth-child(4) { transition-delay: .81s; }
+  body.done .reveal:nth-child(5) { transition-delay: .93s; }
+  body.done footer.reveal { transition-delay: .8s; }
+
+  .hook { text-align: center; }
+  .kicker {
+    color: var(--ice);
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .lead {
+    margin: 8px auto 0;
+    max-width: 22em;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  /* Text block centred vertically between logo and button; button sits just above the footer */
+  .info > section { margin: auto 0; padding: 24px 0 40px; }
+  .cta { text-align: center; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    padding: 0 22px;
+    border: 1px solid var(--ice);
+    background: var(--ice);
+    color: #000;
+    font: inherit;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .badge svg { width: 15px; height: 15px; fill: currentColor; }
+  .cta small { display: block; margin-top: 12px; font-size: inherit; color: var(--muted); }
+
+  /* Always at the bottom of the page / viewport, above the iPhone home indicator */
+  footer {
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 28px;
+    color: var(--muted);
+  }
+  footer a { color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 599px) {
+    .stage { height: 26svh; }
+  }
+
+  /* Wider screens: logo left, text and button right, side by side */
+  @media (min-width: 600px) {
+    body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr auto;
+    }
+    .stage {
+      height: auto;
+      padding: 0 clamp(24px, 5vw, 64px) 0 16px;
+      place-items: center end;
+    }
+    .logo { width: min(26vw, 17svh); }
+    .info {
+      width: auto;
+      margin: 0;
+      padding: 0 16px 0 clamp(24px, 5vw, 64px);
+      justify-content: center;
+      position: relative;
+      align-self: center;
+      min-height: 30svh;
+    }
+    /* Divider only appears once the logo starts sliding left */
+    .info::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: var(--line);
+      opacity: 0;
+      transition: opacity .9s var(--glide);
+    }
+    body.done .info::before { opacity: 1; }
+    .info > section { margin: 0; padding: 0 0 32px; }
+    .hook, .kicker, .lead, .cta { text-align: left; }
+    .lead { margin: 8px 0 0; }
+    footer { grid-column: 1 / -1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo, .reveal, .info::before { transition: none !important; }
+  }
+</style>
+</head>
+<body class="intro">
+
+<header class="stage">
+  <!-- Logo traced from Logo101010.pdf: bar + "10" below; numerator above is animated -->
+  <svg class="logo" viewBox="205 -225 1040 1375" role="img" aria-label="10 von 10">
+    <defs>
+      <path id="g1" d="M454 665H624C619 725 617 780 618 830C620 930 638 1010 666 1099H452C443 1030 437 960 438 880C410 915 380 942 346 969L235 872C320 820 392 752 454 665Z"/>
+      <path id="g0" fill-rule="evenodd" d="M951 662C1102 662 1212 759 1212 893C1212 1027 1102 1124 951 1124C800 1124 690 1027 690 893C690 759 800 662 951 662ZM951 809C1012 809 1049 840 1049 892C1049 945 1012 976 951 976C890 976 853 945 853 892C853 840 890 809 951 809Z"/>
+    </defs>
+
+    <!-- numerator: 1 … 10 (shifted up by 861 so it mirrors the "10" below the bar) -->
+    <g id="numerator" transform="translate(0 -861)">
+      <use class="num" data-n="1" href="#g1" x="272"/>
+      <text class="num digit" data-n="2">2</text>
+      <text class="num digit" data-n="3">3</text>
+      <text class="num digit" data-n="4">4</text>
+      <text class="num digit" data-n="5">5</text>
+      <text class="num digit" data-n="6">6</text>
+      <text class="num digit" data-n="7">7</text>
+      <text class="num digit" data-n="8">8</text>
+      <text class="num digit" data-n="9">9</text>
+      <g class="num" data-n="10"><use href="#g1"/><use href="#g0"/></g>
+    </g>
+
+    <rect x="531" y="415" width="384" height="96"/>
+    <use href="#g1"/>
+    <use href="#g0"/>
+  </svg>
+</header>
+
+<main class="info">
+  <section class="reveal">
+    <p class="hook">10 von 10?</p>
+    <p class="kicker">I doubt it</p>
+    <p class="lead">10/10 startet in Kürze – zuerst in Münster. Halte dich bereit.</p>
+  </section>
+
+  <div class="cta reveal">
+    <a class="badge" href="#" aria-disabled="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9s-2-.9-3.4-.9c-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6s1.8-.8 3.3-.8 2 .8 3.4.8 2.2-1.3 3.1-2.5c1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1-3.2-1 .1-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg>
+      Bald im App Store
+    </a>
+    <small>Für iPhone</small>
+  </div>
+
+</main>
+<footer class="reveal">
+  <a href="impressum.html">Impressum</a>
+  <a href="datenschutz.html">Datenschutz</a>
+  <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>
+  <a href="support.html">Support</a>
+</footer>
+
+<script>
+(() => {
+  const body = document.body;
+  const nums = [...document.querySelectorAll('.num')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Size Rubik digits 2–9 to the cap height of the traced "1" and centre them over the bar.
+  function fitDigits() {
+    const CENTER_X = 723, TOP = 665, BOTTOM = 1099; // numerator coords before the -861 shift
+    // getBBox() on <text> returns the line box, so measure the glyph ink with canvas instead.
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = '900 100px "Rubik"';
+    document.querySelectorAll('.digit').forEach(t => {
+      const m = ctx.measureText(t.textContent);
+      const ink = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+      const s = (BOTTOM - TOP) / ink;
+      const inkCenter = (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;
+      t.setAttribute('font-family', 'Rubik');
+      t.setAttribute('font-weight', 900);
+      t.setAttribute('font-size', 100 * s);
+      t.setAttribute('x', CENTER_X - inkCenter * s);
+      t.setAttribute('y', BOTTOM - m.actualBoundingBoxDescent * s);
+    });
+  }
+
+  // During the intro, centre the logo in the viewport at its intro size.
+  const logo = document.querySelector('.logo');
+  const sideBySide = matchMedia('(min-width: 600px)');
+  function placeIntro() {
+    if (!body.classList.contains('intro')) return;
+    logo.style.transition = 'none';
+    logo.style.setProperty('--dx', '0px');
+    logo.style.setProperty('--dy', '0px');
+    logo.style.setProperty('--s', 1);
+    const r = logo.getBoundingClientRect();
+    const introWidth = Math.min(innerWidth * .26, innerHeight * .17);
+    logo.style.setProperty('--dx', (innerWidth / 2 - (r.left + r.width / 2)) + 'px');
+    // Side by side the logo only slides left, so keep its final height.
+    const dy = sideBySide.matches ? 0 : innerHeight / 2 - (r.top + r.height / 2);
+    logo.style.setProperty('--dy', dy + 'px');
+    logo.style.setProperty('--s', introWidth / r.width);
+    logo.getBoundingClientRect(); // apply before re-enabling the transition
+    logo.style.transition = '';
+  }
+  placeIntro();
+  addEventListener('resize', placeIntro);
+
+  const show = n => nums.forEach(el => el.classList.toggle('on', +el.dataset.n === n));
+  const finish = () => { show(10); body.classList.add('done'); body.classList.remove('intro'); };
+
+  // Fast at first, braking towards 10.
+  const steps = [350, 70, 60, 55, 55, 65, 80, 105, 150, 220];
+
+  (document.fonts ? document.fonts.load('900 100px "Rubik"') : Promise.resolve())
+    .catch(() => {})
+    .then(() => {
+      fitDigits();
+      if (reduced) return finish();
+      let t = 0;
+      const live = () => body.classList.contains('intro');
+      steps.forEach((d, i) => { t += d; setTimeout(() => live() && show(i + 1), t); });
+      setTimeout(() => live() && finish(), t + 500);
+    });
+
+  // Skip the intro on click / key.
+  addEventListener('pointerdown', () => body.classList.contains('intro') && finish(), { once: true });
+})();
+</script>
+</body>
+</html>
