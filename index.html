@@ -6,6 +6,8 @@
 <title>10/10</title>
 <meta name="description" content="10/10 – bald im App Store. Zuerst in Münster.">
 <meta name="theme-color" content="#000000">
+<link rel="preload" href="fonts/rubik-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Barlow-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
@@ -54,7 +56,7 @@
     height: auto;
     fill: var(--ice);
     transform: translate(var(--dx, 0), var(--dy, 0)) scale(var(--s, 1));
-    transition: transform .9s var(--glide);
+    transition: transform .7s var(--glide);
     will-change: transform;
   }
   body.done .logo { transform: none; }
@@ -74,15 +76,11 @@
   .reveal {
     opacity: 0;
     transform: translateY(16px);
-    transition: opacity .7s ease, transform .7s var(--ease);
+    transition: opacity .5s ease, transform .5s var(--ease);
   }
   body.done .reveal { opacity: 1; transform: none; }
-  body.done .reveal:nth-child(1) { transition-delay: .45s; }
-  body.done .reveal:nth-child(2) { transition-delay: .57s; }
-  body.done .reveal:nth-child(3) { transition-delay: .69s; }
-  body.done .reveal:nth-child(4) { transition-delay: .81s; }
-  body.done .reveal:nth-child(5) { transition-delay: .93s; }
-  body.done footer.reveal { transition-delay: .8s; }
+  /* Text and footer appear together, shortly after the logo starts moving */
+  body.done .reveal { transition-delay: .2s; }
 
   .hook { text-align: center; }
   .kicker {
@@ -285,7 +283,7 @@
   const finish = () => { show(10); body.classList.add('done'); body.classList.remove('intro'); };
 
   // Fast at first, braking towards 10.
-  const steps = [350, 70, 60, 55, 55, 65, 80, 105, 150, 220];
+  const steps = [200, 45, 40, 38, 38, 42, 52, 68, 95, 140];
 
   // The intro plays once per browser session; coming back from a subpage skips it.
   let seen = false;
@@ -300,15 +298,18 @@
     requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('instant')));
   }
 
-  (document.fonts ? document.fonts.load('900 100px "Rubik"') : Promise.resolve())
-    .catch(() => {})
+  // Wait for the digit font, but never longer than 400 ms (slow mobile networks);
+  // the digits are re-fitted once the font arrives.
+  const fontReady = document.fonts ? document.fonts.load('900 100px "Rubik"').catch(() => {}) : Promise.resolve();
+  fontReady.then(fitDigits);
+  Promise.race([fontReady, new Promise(r => setTimeout(r, 400))])
     .then(() => {
       fitDigits();
       if (reduced || seen) return finish();
       let t = 0;
       const live = () => body.classList.contains('intro');
       steps.forEach((d, i) => { t += d; setTimeout(() => live() && show(i + 1), t); });
-      setTimeout(() => live() && finish(), t + 500);
+      setTimeout(() => live() && finish(), t + 250);
     });
 
   // Skip the intro on click / key.
