@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="195 250 1057 1057">
-  <!-- 10/10 mark: bar + "10", black on transparent -->
+  <!-- 10/10 mark: bar + "10" on transparent; black, white in dark mode -->
+  <style>path, rect { fill: #000; } @media (prefers-color-scheme: dark) { path, rect { fill: #fff; } }</style>
   <rect x="531" y="415" width="384" height="96"/>
   <path d="M454 665H624C619 725 617 780 618 830C620 930 638 1010 666 1099H452C443 1030 437 960 438 880C410 915 380 942 346 969L235 872C320 820 392 752 454 665Z"/>
   <path fill-rule="evenodd" d="M951 662C1102 662 1212 759 1212 893C1212 1027 1102 1124 951 1124C800 1124 690 1027 690 893C690 759 800 662 951 662ZM951 809C1012 809 1049 840 1049 892C1049 945 1012 976 951 976C890 976 853 945 853 892C853 840 890 809 951 809Z"/>
